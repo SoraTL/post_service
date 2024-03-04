@@ -2,11 +2,13 @@ package com.TooMeet.Post.controller;
 
 
 import com.TooMeet.Post.entity.Post;
+import com.TooMeet.Post.entity.Reaction;
 import com.TooMeet.Post.repository.PostRepository;
 import com.TooMeet.Post.resposn.Response;
 import com.TooMeet.Post.service.CommentService;
 import com.TooMeet.Post.service.ImageUpload;
 import com.TooMeet.Post.service.PostService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -67,10 +69,17 @@ public class PostController {
     }
 
     @GetMapping("")
-    public List<Post> getAll(@RequestHeader(value = "x-user-id", required = false) Long userId,
+    public ResponseEntity<Response> getAll(@RequestHeader(value = "x-user-id", required = false) Long userId,
                              @RequestParam(defaultValue = "0") int page,
-                            @RequestParam(defaultValue = "3") int limit){
-        return postRepository.findAll(PageRequest.of(page,limit)).getContent();
+                             @RequestParam(defaultValue = "3") int limit){
+        {
+            Response response= new Response();
+            Page<Post> posts = postRepository.findAll(PageRequest.of(page,limit));
+            response.setBody(posts.getContent());
+            response.setAllPage(posts.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
     
     @PutMapping("/{postId}")
@@ -131,6 +140,11 @@ public class PostController {
         else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+//    @PostMapping("/reaction")
+//    public ResponseEntity<Reaction> like
+
+    @GetMapping("/group")
+    public ResponseEntity<Post>
 
 
 }

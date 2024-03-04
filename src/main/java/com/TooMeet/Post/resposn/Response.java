@@ -14,28 +14,13 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Response {
     private Header header;
-    private List<Body> body;
+    private List<Post> body;
     private int allPage;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
+//    @Data
+//    @NoArgsConstructor
+//    @AllArgsConstructor
     public static class Header {
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Body {
-        private UUID postId;
-        private String userName;
-        private Long userId;
-        private String content;
-        private String imageUrl;
-        private int privacy;
-        private int emoji;
-        private Timestamp createAt;
-        private Timestamp updateAt;
     }
 
 }
