@@ -9,23 +9,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/posts/comment")
+//@RequestMapping("/")
 public class CommentController {
     @Autowired
     CommentRepository commentRepository;
     @Autowired
     CommentService commentService;
 
-    @PostMapping("")
+    @PostMapping("/posts/")
     public Comment newComment(@RequestParam("comment") String comment,
-                              @RequestParam("replyId") long replyId,
+                              @RequestParam("parentId") long replyId,
                               @RequestParam("postId") UUID postId,
                               @RequestHeader("x-user-id") long userId){
         Comment newComment = new Comment();
         newComment.setComment(comment);
         newComment.setUserId(userId);
         newComment.setPostId(postId);
-        newComment.setReplyId(replyId);
+        newComment.setParentId(replyId);
 
         return commentService.saveComment(newComment);
 

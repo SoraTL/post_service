@@ -42,7 +42,8 @@ public class PostController {
     public ResponseEntity<Post> newPost(@RequestHeader(value = "x-user-id", required = false) Long userId,
                         @RequestParam("content") String content,
                         @RequestParam(value = "images" ,required = false) List<MultipartFile> images,
-                        @RequestParam("privacy") int privacy) throws IOException {
+                        @RequestParam("privacy") int privacy,
+                        @RequestParam(value = "groupId", required = false) Long groupId) throws IOException {
         if(userId != null){
             Post post = new Post();
             post.setContent(content);
@@ -144,7 +145,9 @@ public class PostController {
 //    public ResponseEntity<Reaction> like
 
     @GetMapping("/group")
-    public ResponseEntity<Post>
+    public ResponseEntity<List<Post>> groupPosts(){
 
+        return null;
+    }
 
 }

@@ -21,7 +21,7 @@ public class Comment {
 
     private Long userId;
     private UUID postId;
-    private Long replyId;
+    private Long parentId;
     private String comment;
     private int likeCount = 0;
     private int level = 0;

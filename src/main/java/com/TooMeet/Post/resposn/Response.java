@@ -17,9 +17,6 @@ public class Response {
     private List<Post> body;
     private int allPage;
 
-//    @Data
-//    @NoArgsConstructor
-//    @AllArgsConstructor
     public static class Header {
     }
 
