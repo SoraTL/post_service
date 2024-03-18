@@ -7,14 +7,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
-import java.util.UUID;
 
 @Entity
 @Table
 @Getter
 @Setter
-@IdClass(ReactionId.class)
-public class Reaction {
+@IdClass(CommentReactionId.class)
+public class CommentReaction {
 
     @Id
     private Long userId;
@@ -25,14 +24,12 @@ public class Reaction {
     private Timestamp updatedAt;
 
 
-
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "comment_id")
     @Id
-    private Post post;
-    public void setPost(Post post) {
-        this.post = post;
+    private Comment comment;
+    public void setPost(Comment comment) {
+        this.comment = comment;
     }
-
 
 }
