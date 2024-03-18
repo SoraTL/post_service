@@ -2,8 +2,10 @@ package com.TooMeet.Post.controller;
 
 
 import com.TooMeet.Post.entity.Comment;
+import com.TooMeet.Post.entity.CommentReaction;
 import com.TooMeet.Post.entity.Post;
 import com.TooMeet.Post.entity.Reaction;
+import com.TooMeet.Post.repository.CommentReactionRepository;
 import com.TooMeet.Post.repository.CommentRepository;
 import com.TooMeet.Post.repository.PostRepository;
 import com.TooMeet.Post.repository.ReactionRepository;
@@ -48,6 +50,9 @@ public class PostController {
     CommentRepository commentRepository;
     @Autowired
     ReactionRepository reactionRepository;
+    @Autowired
+    CommentReactionRepository commentReactionRepository;
+
 
     RestTemplate restTemplate = new RestTemplate();
 
@@ -242,7 +247,6 @@ public class PostController {
         }
         post.getComments().add(comment);
         post.setCommentCount(post.getCommentCount()+1);
-//        Comment savedComment= commentRepository.save(comment);
         postRepository.save(post);
         List<Comment> comments=post.getComments();
         Comment savedComment=comments.get(comments.size()-1);
@@ -259,17 +263,32 @@ public class PostController {
 
     }
 
+//    @GetMapping("/{id}/comments")
+//    public ResponseEntity<Page<CommentResponse>> getComment(
+//                                                      @RequestHeader(value = "x-user-id",required = false) Long userId,
+//                                                      @RequestBody GetCommentModel commentModel,
+//                                                      @PathVariable("id") UUID postId){
+//
+//        Page<CommentResponse> comments = commentService.getCommentsByParentId(commentModel.getParentId(),commentModel.getPage(),commentModel.getLimit());
+//        return new ResponseEntity<>(comments,HttpStatus.OK);
+//
+//    }
+
     @GetMapping("/{id}/comments")
     public ResponseEntity<Page<CommentResponse>> getComment(
                                                       @RequestHeader(value = "x-user-id",required = false) Long userId,
                                                       @RequestBody GetCommentModel commentModel,
                                                       @PathVariable("id") UUID postId){
-
-        Page<CommentResponse> comments = commentService.getCommentsByParentId(commentModel.getParentId(),commentModel.getPage(),commentModel.getLimit());
+        Comment comment = commentRepository.findById(commentModel.getParentId()).orElse(null);
+        if(comment==null){
+            return new ResponseEntity<>(commentService.getCommentsByParentIdAndLevel(commentModel.getParentId(),0, commentModel.getPage(), commentModel.getLimit()),HttpStatus.OK);
+        }
+        Page<CommentResponse> comments = commentService.getCommentsByParentIdAndLevel(commentModel.getParentId(),comment.getLevel(),commentModel.getPage(),commentModel.getLimit());
         return new ResponseEntity<>(comments,HttpStatus.OK);
-
     }
 
+
+    // Post Reaction
     @PutMapping("/{id}/reaction")
     public ResponseEntity<ReactionResponse> reaction(@RequestHeader(value = "x-user-id") Long userId,
                                                      @PathVariable("id") UUID postId,
@@ -336,4 +355,42 @@ public class PostController {
 
     }
 
+    //Comment Reaction
+    @PutMapping("/{id}/commentReaction")
+    public ResponseEntity<ReactionResponse> commentReaction(@RequestHeader(value = "x-user-id") Long userId,
+                                                  @PathVariable("id") UUID commentId,
+                                                  @RequestBody NewReactionModel reactionModel){
+        ReactionResponse response = new ReactionResponse();
+        if(reactionModel.getEmoji()>5 || reactionModel.getEmoji()<0) {
+            response.setMassage("Emoji nằm trong khỏang 0 đến 5");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        Comment comment=new Comment();
+        comment = commentRepository.findById(commentId).orElse(null);
+        if(comment==null) {
+            response.setMassage("Không tìm thấy binh luan " + commentId.toString());
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        CommentReaction reaction = commentReactionRepository.getByCommentIdAndUserId(commentId,userId);
+        if(reaction!=null){
+            reaction.setEmoji(reactionModel.getEmoji());
+            commentReactionRepository.save(reaction);
+            response.setMassage("Đã cập nhật tương tác!");
+            response.setReactionCount(comment.getLikeCount());
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        }
+
+        CommentReaction newReaction = new CommentReaction();
+        newReaction.setEmoji(reactionModel.getEmoji());
+        newReaction.setUserId(userId);
+
+        comment.getReactions().add(newReaction);
+        newReaction.setComment(comment);
+        comment.setLikeCount(comment.getLikeCount()+1);
+        commentRepository.save(comment);
+        response.setMassage("Tương tác thành công!");
+        response.setReactionCount(comment.getLikeCount());
+        return new ResponseEntity<>(response,HttpStatus.CREATED);
+    }
+    
 }
